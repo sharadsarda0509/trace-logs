@@ -1,0 +1,20 @@
+[project]
+name = "traceid-log-service"
+version = "1.0.0"
+description = "A lightweight API for querying Splunk logs by traceId"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.104.1",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "python-dotenv>=1.0.0",
+    "splunk-sdk>=1.7.4",
+    "hvac>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "httpx>=0.25.0",
+]
+
