@@ -2,6 +2,12 @@
 
 A lightweight web application for querying Splunk logs by trace ID with a React frontend and FastAPI backend.
 
+
+![TraceID Log Search Interface](frontend/src/assets/frontend.png)
+
+
+![TraceID Log Search APIs](frontend/src/assets/api.png)
+
 ## Features
 
 - 🔍 Search Splunk logs by trace ID
