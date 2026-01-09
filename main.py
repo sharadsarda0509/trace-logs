@@ -7,10 +7,10 @@ A lightweight API for querying Splunk logs by traceId.
 import logging
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 
 import config
@@ -36,6 +36,42 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# API Key Authentication Middleware
+@app.middleware("http")
+async def verify_api_key(request: Request, call_next):
+    """
+    Verify API key for all requests except health check and static files.
+    Expects X-API-Key header to match configured API_KEY.
+    """
+    # Skip authentication for health check endpoint
+    if request.url.path == "/health":
+        return await call_next(request)
+    
+    # Skip authentication for static files (HTML, CSS, JS, etc.)
+    if not request.url.path.startswith("/api/"):
+        return await call_next(request)
+    
+    # Check for API key in headers
+    api_key = request.headers.get("X-API-Key")
+    
+    if not api_key:
+        logger.warning(f"Missing API key for request to {request.url.path}")
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Missing API Key. Please provide X-API-Key header."},
+        )
+    
+    if api_key != config.API_KEY:
+        logger.warning(f"Invalid API key attempted for {request.url.path}")
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"detail": "Invalid API Key"},
+        )
+    
+    # API key is valid, proceed with request
+    return await call_next(request)
 
 
 @app.on_event("startup")

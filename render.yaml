@@ -19,6 +19,10 @@ services:
     
     # Environment variables (set these in Render dashboard)
     envVars:
+      # Authentication (REQUIRED)
+      - key: API_KEY
+        sync: false # Set as secret in Render dashboard - users need this to login
+      
       # Splunk Configuration (REQUIRED)
       - key: SPLUNK_HOST
         value: splunk-api.or1.adobe.net

@@ -23,11 +23,32 @@ body {
   color: white;
   padding: 2rem 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.logout-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 1rem;
+}
+
+.logout-button:hover {
+  background: white;
+  color: #0066cc;
 }
 
 .app-header h1 {

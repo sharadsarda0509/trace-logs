@@ -11,6 +11,7 @@ A lightweight web application for querying Splunk logs by trace ID with a React 
 ## Features
 
 - 🔍 Search Splunk logs by trace ID
+- 🔐 **API Key authentication** - Secure access control
 - 🎨 Modern React UI with JSON viewer
 - ⚙️ Configurable search parameters (AEM service, index, tier, time range)
 - 🚀 Fast API built with FastAPI
@@ -66,6 +67,11 @@ cp .env.example .env
 
 Required environment variables:
 ```bash
+# Generate API key first
+API_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
+echo "API_KEY=$API_KEY" >> .env
+
+# Add Splunk credentials
 SPLUNK_HOST=splunk-api.or1.adobe.net
 SPLUNK_USER=your-username
 SPLUNK_PASS=your-password
@@ -101,9 +107,11 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8002
 
 The application will be available at: **http://localhost:8002**
 
-- Frontend: `http://localhost:8002/`
+- Frontend: `http://localhost:8002/` (login with API key)
 - API: `http://localhost:8002/api/logs/search`
 - Health check: `http://localhost:8002/health`
+
+**First time login:** Enter the API_KEY you set in `.env` file
 
 ## Development
 
@@ -178,6 +186,26 @@ Response:
   "service": "traceid-log-service"
 }
 ```
+
+## Authentication
+
+This application is protected with API Key authentication. All users must log in with a valid API key.
+
+### Generating an API Key
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+### Setting Up
+
+1. **Local Development:** Add `API_KEY=your-generated-key` to `.env` file
+2. **Render Deployment:** Set `API_KEY` as environment variable in Render dashboard
+3. **Share with Users:** Send API key to authorized users via secure channel
+
+See `AUTHENTICATION.md` for detailed security guidelines.
+
+---
 
 ## Configuration
 

@@ -65,6 +65,9 @@ DEFAULT_TIME_RANGE_HOURS: int = int(os.getenv("DEFAULT_TIME_RANGE_HOURS", "24"))
 MAX_TIME_RANGE_HOURS: int = int(os.getenv("MAX_TIME_RANGE_HOURS", "168"))  # 7 days
 DEFAULT_LIMIT: int = int(os.getenv("DEFAULT_LIMIT", "500"))
 
+# Authentication configuration
+API_KEY: str = os.getenv("API_KEY", "")  # API key for authentication
+
 # Logging configuration
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
@@ -107,6 +110,8 @@ def validate_config() -> bool:
         errors.append("SPLUNK_USER is required")
     if not SPLUNK_PASS:
         errors.append("SPLUNK_PASS is required (via Vault or environment variable)")
+    if not API_KEY:
+        errors.append("API_KEY is required for authentication")
     
     if errors:
         for error in errors:

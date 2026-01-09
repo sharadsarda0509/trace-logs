@@ -4,6 +4,26 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.PROD ? '' : 'http://localhost:8002';
 
 /**
+ * Get API key from localStorage
+ * @returns {string|null} API key or null if not found
+ */
+function getApiKey() {
+  return localStorage.getItem('apiKey');
+}
+
+/**
+ * Get headers with API key
+ * @returns {Object} Headers object with API key
+ */
+function getAuthHeaders() {
+  const apiKey = getApiKey();
+  return {
+    'Content-Type': 'application/json',
+    ...(apiKey && { 'X-API-Key': apiKey }),
+  };
+}
+
+/**
  * Search Splunk logs by trace ID
  * @param {Object} searchParams - Search parameters
  * @param {string} searchParams.trace_id - Trace ID to search for
@@ -17,9 +37,7 @@ const API_BASE_URL = import.meta.env.PROD ? '' : 'http://localhost:8002';
 export async function searchLogs(searchParams) {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/logs/search`, searchParams, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
     return response.data;
   } catch (error) {
