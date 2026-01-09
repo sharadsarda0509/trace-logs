@@ -243,12 +243,38 @@ async def get_analytics_summary(request: AnalyticsSummaryRequest) -> AnalyticsSu
 static_dir = Path(__file__).parent / "static"
 
 if static_dir.exists():
+    # Mount static files for assets (CSS, JS, images)
     app.mount(
-        "/",
-        StaticFiles(directory=static_dir, html=True),
-        name="static"
+        "/assets",
+        StaticFiles(directory=static_dir / "assets"),
+        name="assets"
     )
-    logger.info(f"Static files mounted from {static_dir}")
+    logger.info(f"Static assets mounted from {static_dir / 'assets'}")
+    
+    # Catch-all route for SPA routing - serves index.html for all non-API routes
+    # This must be defined AFTER all API routes
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """
+        Catch-all route to serve index.html for client-side routing.
+        This allows React Router to handle routes like /dashboard, /trace-search, etc.
+        """
+        # Serve index.html for all paths (API routes are already handled above)
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        else:
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": "Frontend not found",
+                    "message": "index.html not found in static directory",
+                    "api_docs": "/docs",
+                    "health": "/health"
+                }
+            )
+    
+    logger.info(f"SPA routing enabled - serving index.html for all non-API routes")
 else:
     logger.error(f"Static directory not found at {static_dir}. Frontend will not be served.")
     logger.error("Please build the frontend with: cd frontend && npm install && npm run build")
