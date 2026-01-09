@@ -21,16 +21,17 @@ body {
 .app-header {
   background: linear-gradient(135deg, #0066cc 0%, #004d99 100%);
   color: white;
-  padding: 2rem 1rem;
+  padding: 1.5rem 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .header-content {
-  max-width: 1200px;
-  margin: 0 auto;
+  flex: 0 0 auto;
 }
 
 .logout-button {
@@ -49,6 +50,42 @@ body {
 .logout-button:hover {
   background: white;
   color: #0066cc;
+}
+
+/* Navigation Tabs */
+.main-navigation {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.nav-tab {
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.nav-tab:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-tab.active {
+  background: white;
+  color: #0066cc;
+  border-color: white;
+}
+
+/* Page Content */
+.page-content {
+  width: 100%;
 }
 
 .app-header h1 {
@@ -87,8 +124,30 @@ body {
 }
 
 @media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .app-header h1 {
     font-size: 1.5rem;
+  }
+
+  .header-content {
+    text-align: center;
+  }
+
+  .main-navigation {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-tab {
+    text-align: center;
+  }
+
+  .logout-button {
+    width: 100%;
   }
   
   .app-main {

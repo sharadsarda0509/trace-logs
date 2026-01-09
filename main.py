@@ -151,6 +151,28 @@ async def health_check() -> HealthResponse:
     return HealthResponse(status="healthy", service="traceid-log-service")
 
 
+@app.post(
+    "/api/auth/validate",
+    summary="Validate API key",
+    description="Validate if the provided API key is correct.",
+    responses={
+        200: {"description": "API key is valid"},
+        401: {"description": "Missing API key"},
+        403: {"description": "Invalid API key"},
+    },
+)
+async def validate_api_key(request: Request):
+    """
+    Validate API key without making Splunk queries.
+    This endpoint is used by the login page to verify credentials.
+    
+    Note: This endpoint is NOT excluded from authentication middleware,
+    so it will automatically validate the X-API-Key header.
+    """
+    # If we reach here, the API key is valid (middleware already checked it)
+    return {"valid": True, "message": "API key is valid"}
+
+
 # Mount static files (built React app)
 # Note: API routes defined above take precedence over static files
 static_dir = Path(__file__).parent / "static"

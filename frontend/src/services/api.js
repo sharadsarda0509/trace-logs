@@ -71,38 +71,36 @@ export async function checkHealth() {
  */
 export async function validateApiKey(apiKey) {
   try {
-    // Make a test request with the API key to validate it
-    // We'll use the search endpoint with minimal data to test authentication
+    // Use dedicated validation endpoint that doesn't query Splunk
     const response = await axios.post(
-      `${API_BASE_URL}/api/logs/search`,
-      {
-        trace_id: 'validation-test',
-        aem_service: 'validation-test',
-        index: 'validation-test',
-        aem_tier: 'author',
-        time_range_hours: 1,
-        limit: 1
-      },
+      `${API_BASE_URL}/api/auth/validate`,
+      {},
       {
         headers: {
           'Content-Type': 'application/json',
           'X-API-Key': apiKey,
         },
         validateStatus: function (status) {
-          // Consider 401/403 as "handled" errors for validation
-          // 500 might mean API key is valid but other error occurred
-          return status < 500;
+          // Accept any status code so we can handle it
+          return true;
         }
       }
     );
 
-    // If we get 401 or 403, the API key is invalid
-    if (response.status === 401 || response.status === 403) {
-      throw new Error('Invalid API Key');
+    // If we get 200, the API key is valid
+    if (response.status === 200) {
+      return true;
     }
 
-    // Any other response (including 500 from bad parameters) means API key is valid
-    return true;
+    // If we get 401 or 403, the API key is invalid
+    if (response.status === 401) {
+      throw new Error('Invalid API Key: Authentication required');
+    } else if (response.status === 403) {
+      throw new Error('Invalid API Key: Access forbidden');
+    }
+
+    // Any other error
+    throw new Error('Unable to validate API key');
   } catch (error) {
     if (error.response) {
       if (error.response.status === 401) {

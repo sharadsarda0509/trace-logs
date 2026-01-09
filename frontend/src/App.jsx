@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
-import SearchForm from './components/SearchForm';
-import LogViewer from './components/LogViewer';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Login from './components/Login';
-import { searchLogs } from './services/api';
+import TraceSearch from './pages/TraceSearch';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 function App() {
-  const [results, setResults] = useState(null);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Check if user is already authenticated (API key in localStorage)
@@ -26,30 +23,6 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('apiKey');
     setIsAuthenticated(false);
-    setResults(null);
-    setError(null);
-  };
-
-  const handleSearch = async (searchParams) => {
-    setIsLoading(true);
-    setError(null);
-    setResults(null);
-
-    try {
-      const data = await searchLogs(searchParams);
-      setResults(data);
-    } catch (err) {
-      // Check if error is authentication related
-      if (err.message.includes('API Key') || err.message.includes('401') || err.message.includes('403')) {
-        setError('Authentication failed. Please log in again.');
-        handleLogout();
-      } else {
-        setError(err.message);
-      }
-      console.error('Search error:', err);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   // Show login page if not authenticated
@@ -58,28 +31,55 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="header-content">
-          <h1>🔍 TraceID Log Search</h1>
-          <p className="subtitle">Query Splunk logs by trace ID</p>
-        </div>
-        <button onClick={handleLogout} className="logout-button">
-          Logout
-        </button>
-      </header>
+    <BrowserRouter>
+      <div className="app">
+        <AppHeader onLogout={handleLogout} />
+        <main className="app-main">
+          <div className="container">
+            <Routes>
+              <Route path="/" element={<Navigate to="/trace-search" replace />} />
+              <Route path="/trace-search" element={<TraceSearch />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Routes>
+          </div>
+        </main>
+        <footer className="app-footer">
+          <p>TraceID Log Service v1.0.0</p>
+        </footer>
+      </div>
+    </BrowserRouter>
+  );
+}
 
-      <main className="app-main">
-        <div className="container">
-          <SearchForm onSearch={handleSearch} isLoading={isLoading} />
-          <LogViewer results={results} error={error} />
-        </div>
-      </main>
+function AppHeader({ onLogout }) {
+  const location = useLocation();
 
-      <footer className="app-footer">
-        <p>TraceID Log Service v1.0.0</p>
-      </footer>
-    </div>
+  return (
+    <header className="app-header">
+      <div className="header-content">
+        <h1>🔍 TraceID Log Search</h1>
+        <p className="subtitle">Query Splunk logs and analyze API performance</p>
+      </div>
+      
+      <nav className="main-navigation">
+        <Link 
+          to="/trace-search" 
+          className={`nav-tab ${location.pathname === '/trace-search' ? 'active' : ''}`}
+        >
+          📍 Trace Search
+        </Link>
+        <Link 
+          to="/dashboard" 
+          className={`nav-tab ${location.pathname === '/dashboard' ? 'active' : ''}`}
+        >
+          📊 API Dashboard
+        </Link>
+      </nav>
+
+      <button onClick={onLogout} className="logout-button">
+        Logout
+      </button>
+    </header>
   );
 }
 
