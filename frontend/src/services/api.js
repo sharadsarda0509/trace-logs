@@ -65,6 +65,35 @@ export async function checkHealth() {
 }
 
 /**
+ * Get analytics summary for dashboard
+ * @param {Object} params - Analytics parameters
+ * @param {string} params.aem_service - AEM service identifier
+ * @param {string} params.index - Splunk index
+ * @param {string} params.aem_tier - AEM tier
+ * @param {number} params.time_range_days - Days to look back (1, 7, or 30)
+ * @returns {Promise<Object>} Analytics summary
+ */
+export async function getAnalyticsSummary(params) {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/api/analytics/summary`,
+      params,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.detail 
+      || error.response?.data?.message 
+      || error.message 
+      || 'Failed to fetch analytics';
+    
+    throw new Error(errorMessage);
+  }
+}
+
+/**
  * Validate API key by making a test request
  * @param {string} apiKey - API key to validate
  * @returns {Promise<boolean>} True if valid, throws error if invalid

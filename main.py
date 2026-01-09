@@ -5,6 +5,7 @@ A lightweight API for querying Splunk logs by traceId.
 """
 
 import logging
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -14,8 +15,9 @@ from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 
 import config
-from models import LogSearchRequest, LogSearchResponse, HealthResponse
+from models import LogSearchRequest, LogSearchResponse, HealthResponse, AnalyticsSummaryRequest, AnalyticsSummaryResponse
 from splunk_client import get_splunk_client
+from analytics_client import get_analytics_client
 
 # Initialize configuration
 config.setup_logging()
@@ -171,6 +173,69 @@ async def validate_api_key(request: Request):
     """
     # If we reach here, the API key is valid (middleware already checked it)
     return {"valid": True, "message": "API key is valid"}
+
+
+@app.post(
+    "/api/analytics/summary",
+    response_model=AnalyticsSummaryResponse,
+    summary="Get analytics dashboard summary",
+    description="Get aggregated API metrics including response codes, time series, errors, and endpoint performance.",
+    responses={
+        200: {"description": "Analytics retrieved successfully"},
+        400: {"description": "Invalid request parameters"},
+        500: {"description": "Internal server error or Splunk connection failure"},
+    },
+)
+async def get_analytics_summary(request: AnalyticsSummaryRequest) -> AnalyticsSummaryResponse:
+    """
+    Get aggregated analytics for dashboard.
+
+    This endpoint queries Splunk for aggregated metrics including:
+    - Total API calls and error rates
+    - Response code distribution
+    - Time series data (calls over time)
+    - Top errors and failure patterns
+    - Endpoint performance metrics
+    """
+    logger.info(
+        f"Fetching analytics summary for aem_service={request.aem_service}, "
+        f"index={request.index}, aem_tier={request.aem_tier}, "
+        f"time_range_days={request.time_range_days}"
+    )
+
+    try:
+        # Get analytics client and execute queries
+        analytics_client = get_analytics_client()
+        query_start = time.time()
+        
+        result = analytics_client.get_dashboard_summary(
+            aem_service=request.aem_service,
+            index=request.index,
+            aem_tier=request.aem_tier,
+            time_range_days=request.time_range_days,
+        )
+        
+        query_time = time.time() - query_start
+
+        logger.info(f"Analytics query completed in {query_time:.2f}s")
+
+        return AnalyticsSummaryResponse(
+            success=True,
+            time_range=result["time_range"],
+            summary=result["summary"],
+            response_codes=result["response_codes"],
+            time_series=result["time_series"],
+            top_errors=result["top_errors"],
+            endpoints=result["endpoints"],
+            query_time_seconds=round(query_time, 2),
+        )
+
+    except Exception as e:
+        logger.error(f"Analytics query failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch analytics: {str(e)}",
+        )
 
 
 # Mount static files (built React app)

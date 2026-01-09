@@ -19,9 +19,9 @@ class LogSearchRequest(BaseModel):
     )
     aem_service: str = Field(
         ...,
-        description="AEM service identifier",
+        description="AEM service identifier(s) - comma-separated for multiple services",
         min_length=1,
-        examples=["cm-p153560-e1607906"],
+        examples=["cm-p153560-e1607906", "cm-p153560-e1607906, cm-p123456-e7890123"],
     )
     index: str = Field(
         ...,
@@ -71,4 +71,47 @@ class HealthResponse(BaseModel):
 
     status: str = Field(..., description="Service status")
     service: str = Field(..., description="Service name")
+
+
+class AnalyticsSummaryRequest(BaseModel):
+    """Request model for analytics summary endpoint."""
+
+    aem_service: str = Field(
+        ...,
+        description="AEM service identifier(s) - comma-separated for multiple services",
+        min_length=1,
+        examples=["cm-p153560-e1607906", "cm-p153560-e1607906, cm-p123456-e7890123"],
+    )
+    index: str = Field(
+        ...,
+        description="Splunk index to search",
+        min_length=1,
+        examples=["dx_aem_engineering"],
+    )
+    aem_tier: str = Field(
+        ...,
+        description="AEM tier (author or publish)",
+        min_length=1,
+        examples=["author", "publish"],
+    )
+    time_range_days: int = Field(
+        default=7,
+        ge=1,
+        le=30,
+        description="Days to look back (1, 7, or 30)",
+    )
+
+
+class AnalyticsSummaryResponse(BaseModel):
+    """Response model for analytics summary endpoint."""
+
+    success: bool = Field(..., description="Whether the query was successful")
+    time_range: Dict[str, Any] = Field(..., description="Time range for the analytics")
+    summary: Dict[str, Any] = Field(..., description="Summary metrics")
+    response_codes: Dict[str, Any] = Field(..., description="Response code distribution")
+    time_series: List[Dict[str, Any]] = Field(..., description="Time series data")
+    top_errors: List[Dict[str, Any]] = Field(..., description="Top errors")
+    endpoints: List[Dict[str, Any]] = Field(..., description="Endpoint performance")
+    query_time_seconds: float = Field(..., description="Time taken to execute queries")
+    error: Optional[str] = Field(None, description="Error message if failed")
 

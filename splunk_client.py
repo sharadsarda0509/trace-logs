@@ -44,7 +44,8 @@ class SplunkClient:
 
         Args:
             trace_id: The trace ID to search for
-            aem_service: AEM service identifier (e.g., "cm-p153560-e1607906")
+            aem_service: AEM service identifier(s) - comma-separated for multiple
+                        (e.g., "cm-p153560-e1607906" or "cm-p153560-e1607906, cm-p123456-e7890123")
             index: Splunk index to search (e.g., "dx_aem_engineering")
             aem_tier: AEM tier (e.g., "author", "publish")
             time_range_hours: How far back to search (default: 24 hours, max: 168 hours)
@@ -60,10 +61,19 @@ class SplunkClient:
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(hours=time_range_hours)
 
+        # Handle multiple AEM services (comma-separated)
+        aem_services = [s.strip() for s in aem_service.split(',') if s.strip()]
+        if len(aem_services) > 1:
+            # Multiple services: use OR condition
+            service_filter = '(' + ' OR '.join([f'aem_service="{svc}"' for svc in aem_services]) + ')'
+        else:
+            # Single service
+            service_filter = f'aem_service="{aem_services[0]}"'
+
         # Build SPL query
         query = (
             f'search index="{index}" '
-            f'aem_service="{aem_service}" '
+            f'{service_filter} '
             f'aem_tier="{aem_tier}" '
             f'traceId="{trace_id}" '
             f'| sort -_time '

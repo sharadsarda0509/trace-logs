@@ -250,6 +250,219 @@ curl https://traceid-log-service.onrender.com/health
 
 ---
 
+### 2. Get Analytics Dashboard Summary
+
+Retrieves aggregated API metrics including response codes, time series, errors, and endpoint performance.
+
+#### Endpoint
+
+```
+POST /api/analytics/summary
+```
+
+#### Request Headers
+
+```http
+Content-Type: application/json
+X-API-Key: your-api-key-here
+```
+
+#### Request Body
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `aem_service` | string | ✅ Yes | - | AEM service identifier (e.g., "cm-p153560-e1607906") |
+| `index` | string | ✅ Yes | - | Splunk index to search (e.g., "dx_aem_engineering") |
+| `aem_tier` | string | ✅ Yes | - | AEM tier: "author" or "publish" |
+| `time_range_days` | integer | ❌ No | 7 | Days to look back: 1, 7, or 30 (max: 30) |
+
+#### Example Request
+
+```bash
+curl -X POST https://traceid-log-service.onrender.com/api/analytics/summary \
+  -H "X-API-Key: n5a-BCkPunZNt2VkscD-VhRYhJWvX1HIHKbrjjk-uco" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "aem_service": "cm-p153560-e1607906",
+    "index": "dx_aem_engineering",
+    "aem_tier": "author",
+    "time_range_days": 7
+  }'
+```
+
+#### Request Body (JSON)
+
+```json
+{
+  "aem_service": "cm-p153560-e1607906",
+  "index": "dx_aem_engineering",
+  "aem_tier": "author",
+  "time_range_days": 7
+}
+```
+
+#### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "time_range": {
+    "start": "2026-01-02T00:00:00",
+    "end": "2026-01-09T00:00:00",
+    "days": 7
+  },
+  "summary": {
+    "total_calls": 45623,
+    "total_errors": 1234,
+    "error_rate": 2.7,
+    "unique_endpoints": 42
+  },
+  "response_codes": {
+    "200": {
+      "count": 42389,
+      "percentage": 92.9
+    },
+    "400": {
+      "count": 500,
+      "percentage": 1.1
+    },
+    "404": {
+      "count": 234,
+      "percentage": 0.5
+    },
+    "500": {
+      "count": 500,
+      "percentage": 1.1
+    }
+  },
+  "time_series": [
+    {
+      "timestamp": "2026-01-08T00:00:00",
+      "total_calls": 6523,
+      "by_code": {
+        "200": 6100,
+        "400": 200,
+        "500": 223
+      }
+    }
+  ],
+  "top_errors": [
+    {
+      "endpoint": "/api/v1/content/pages",
+      "response_code": "500",
+      "count": 234,
+      "message": "Internal server error: Database connection timeout",
+      "first_seen": "2026-01-02T14:23:10",
+      "last_seen": "2026-01-09T09:45:32"
+    }
+  ],
+  "endpoints": [
+    {
+      "path": "/api/v1/content/pages",
+      "total_calls": 15234,
+      "error_count": 234,
+      "error_rate": 1.54,
+      "avg_response_time_ms": 125.45
+    }
+  ],
+  "query_time_seconds": 3.42
+}
+```
+
+#### Response Fields
+
+**Summary Metrics**
+- `total_calls`: Total number of API calls in the time range
+- `total_errors`: Total number of errors (response code >= 400)
+- `error_rate`: Percentage of errors out of total calls
+- `unique_endpoints`: Number of distinct API endpoints called
+
+**Response Codes**
+- Distribution of HTTP response codes with count and percentage
+
+**Time Series**
+- API call trends over time
+- Grouped by response codes
+- Time span varies by time range:
+  - **1 day**: 1-hour intervals
+  - **7 days**: 6-hour intervals
+  - **30 days**: 1-day intervals
+
+**Top Errors**
+- Up to 20 most frequent errors
+- Includes endpoint, response code, count, error message, first/last occurrence
+
+**Endpoints**
+- Up to 20 most called endpoints
+- Performance metrics including:
+  - Total calls
+  - Error count and rate
+  - Average response time in milliseconds
+
+#### Error Responses
+
+| Status Code | Description | Example |
+|-------------|-------------|---------|
+| `400` | Invalid request parameters | `{"detail": "time_range_days must be between 1 and 30"}` |
+| `401` | Missing API Key | `{"detail": "Missing X-API-Key header"}` |
+| `403` | Invalid API Key | `{"detail": "Invalid API key"}` |
+| `500` | Splunk connection or query failure | `{"detail": "Failed to fetch analytics: Connection timeout"}` |
+
+#### Python Example
+
+```python
+import requests
+
+url = "https://traceid-log-service.onrender.com/api/analytics/summary"
+headers = {
+    "Content-Type": "application/json",
+    "X-API-Key": "n5a-BCkPunZNt2VkscD-VhRYhJWvX1HIHKbrjjk-uco"
+}
+payload = {
+    "aem_service": "cm-p153560-e1607906",
+    "index": "dx_aem_engineering",
+    "aem_tier": "author",
+    "time_range_days": 7
+}
+
+response = requests.post(url, headers=headers, json=payload)
+data = response.json()
+
+print(f"Total API Calls: {data['summary']['total_calls']}")
+print(f"Error Rate: {data['summary']['error_rate']}%")
+```
+
+#### JavaScript Example
+
+```javascript
+const url = 'https://traceid-log-service.onrender.com/api/analytics/summary';
+const apiKey = 'n5a-BCkPunZNt2VkscD-VhRYhJWvX1HIHKbrjjk-uco';
+
+const payload = {
+  aem_service: 'cm-p153560-e1607906',
+  index: 'dx_aem_engineering',
+  aem_tier: 'author',
+  time_range_days: 7
+};
+
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': apiKey
+  },
+  body: JSON.stringify(payload)
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log('Total API Calls:', data.summary.total_calls);
+    console.log('Error Rate:', data.summary.error_rate + '%');
+  })
+  .catch(error => console.error('Error:', error));
+```
+
+---
+
 ## Usage Examples
 
 ### Example 1: Basic Search (curl)

@@ -8,7 +8,7 @@ export default function SearchForm({ onSearch, isLoading }) {
   // Advanced options with defaults
   const [aemService, setAemService] = useState('cm-p153560-e1607906');
   const [index, setIndex] = useState('dx_aem_engineering');
-  const [aemTier, setAemTier] = useState('author');
+  const [aemTier, setAemTier] = useState('publish'); // Production default
   const [timeRangeHours, setTimeRangeHours] = useState(24);
   const [limit, setLimit] = useState(500);
 
@@ -59,12 +59,16 @@ export default function SearchForm({ onSearch, isLoading }) {
         <div className="advanced-options">
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="aemService">AEM Service</label>
+              <label htmlFor="aemService">
+                AEM Service(s)
+                <span className="field-hint"> (comma-separated for multiple)</span>
+              </label>
               <input
                 type="text"
                 id="aemService"
                 value={aemService}
                 onChange={(e) => setAemService(e.target.value)}
+                placeholder="e.g., cm-p153560-e1607906, cm-p123456-e7890123"
                 disabled={isLoading}
               />
             </div>
@@ -90,7 +94,6 @@ export default function SearchForm({ onSearch, isLoading }) {
                 onChange={(e) => setAemTier(e.target.value)}
                 disabled={isLoading}
               >
-                <option value="author">Author</option>
                 <option value="publish">Publish</option>
               </select>
             </div>
