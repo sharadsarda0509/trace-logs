@@ -16,7 +16,7 @@ export default function SearchForm({ onSearch, isLoading }) {
     e.preventDefault();
     
     if (!traceId.trim()) {
-      alert('Please enter a trace ID');
+      alert('Please enter a journey ID');
       return;
     }
 
@@ -34,14 +34,14 @@ export default function SearchForm({ onSearch, isLoading }) {
     <form onSubmit={handleSubmit} className="search-form">
       <div className="form-group">
         <label htmlFor="traceId">
-          Trace ID <span className="required">*</span>
+          Journey ID <span className="required">*</span>
         </label>
         <input
           type="text"
           id="traceId"
           value={traceId}
           onChange={(e) => setTraceId(e.target.value)}
-          placeholder="Enter trace ID (e.g., abc-123-def-456)"
+          placeholder="Enter journey ID (e.g., abc-123-def-456)"
           disabled={isLoading}
           required
         />

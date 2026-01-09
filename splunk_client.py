@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SplunkClient:
-    """Client for querying Splunk logs by traceId."""
+    """Client for querying Splunk logs by journeyId."""
 
     def __init__(self) -> None:
         """Initialize Splunk connection."""
@@ -40,10 +40,10 @@ class SplunkClient:
         limit: int = config.DEFAULT_LIMIT,
     ) -> Dict[str, Any]:
         """
-        Search Splunk logs by traceId.
+        Search Splunk logs by journeyId.
 
         Args:
-            trace_id: The trace ID to search for
+            trace_id: The journey ID to search for (field name kept for API compatibility)
             aem_service: AEM service identifier(s) - comma-separated for multiple
                         (e.g., "cm-p153560-e1607906" or "cm-p153560-e1607906, cm-p123456-e7890123")
             index: Splunk index to search (e.g., "dx_aem_engineering")
@@ -70,12 +70,12 @@ class SplunkClient:
             # Single service
             service_filter = f'aem_service="{aem_services[0]}"'
 
-        # Build SPL query
+        # Build SPL query using journeyId field
         query = (
             f'search index="{index}" '
             f'{service_filter} '
             f'aem_tier="{aem_tier}" '
-            f'traceId="{trace_id}" '
+            f'journeyId="{trace_id}" '
             f'| sort -_time '
             f'| head {limit}'
         )

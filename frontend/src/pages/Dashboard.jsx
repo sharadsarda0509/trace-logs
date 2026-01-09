@@ -205,7 +205,6 @@ export default function Dashboard() {
 
       {!analytics && !isLoading && !error && (
         <div className="dashboard-placeholder">
-          <div className="placeholder-icon">📊</div>
           <h3>Click "Apply Filters" to Load Analytics</h3>
           <p>Configure your filters above and click Apply to see dashboard metrics.</p>
         </div>

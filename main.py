@@ -86,8 +86,8 @@ async def startup_event():
 @app.post(
     "/api/logs/search",
     response_model=LogSearchResponse,
-    summary="Search logs by traceId",
-    description="Search Splunk logs for a specific traceId within the given AEM service and time range.",
+    summary="Search logs by journeyId",
+    description="Search Splunk logs for a specific journeyId within the given AEM service and time range.",
     responses={
         200: {"description": "Search completed successfully"},
         400: {"description": "Invalid request parameters"},
@@ -96,13 +96,13 @@ async def startup_event():
 )
 async def search_logs(request: LogSearchRequest) -> LogSearchResponse:
     """
-    Search Splunk logs by traceId.
+    Search Splunk logs by journeyId.
 
     This endpoint queries Splunk for logs matching the provided traceId
     within the specified AEM service, index, and time range.
     """
     logger.info(
-        f"Searching logs for traceId={request.trace_id}, "
+        f"Searching logs for journeyId={request.trace_id}, "
         f"aem_service={request.aem_service}, "
         f"index={request.index}, "
         f"aem_tier={request.aem_tier}, "
@@ -135,7 +135,7 @@ async def search_logs(request: LogSearchRequest) -> LogSearchResponse:
         )
 
     except Exception as e:
-        logger.error(f"Search failed for traceId={request.trace_id}: {e}")
+        logger.error(f"Search failed for journeyId={request.trace_id}: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Failed to search logs: {str(e)}",

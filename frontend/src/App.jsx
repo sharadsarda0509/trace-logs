@@ -57,7 +57,7 @@ function AppHeader({ onLogout }) {
   return (
     <header className="app-header">
       <div className="header-content">
-        <h1>🔍 TraceID Log Search</h1>
+        <h1>Journey Log Search</h1>
         <p className="subtitle">Query Splunk logs and analyze API performance</p>
       </div>
       
@@ -66,13 +66,13 @@ function AppHeader({ onLogout }) {
           to="/trace-search" 
           className={`nav-tab ${location.pathname === '/trace-search' ? 'active' : ''}`}
         >
-          📍 Trace Search
+          Journey Search
         </Link>
         <Link 
           to="/dashboard" 
           className={`nav-tab ${location.pathname === '/dashboard' ? 'active' : ''}`}
         >
-          📊 API Dashboard
+          API Dashboard
         </Link>
       </nav>
 

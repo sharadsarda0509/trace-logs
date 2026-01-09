@@ -6,7 +6,7 @@ export default function LogViewer({ results, error }) {
     return (
       <div className="log-viewer">
         <div className="error-message">
-          <h3>❌ Error</h3>
+          <h3>Error</h3>
           <p>{error}</p>
         </div>
       </div>
@@ -25,7 +25,7 @@ export default function LogViewer({ results, error }) {
         <h2>Search Results</h2>
         <div className="results-summary">
           <div className="summary-item">
-            <span className="label">Trace ID:</span>
+            <span className="label">Journey ID:</span>
             <span className="value">{trace_id}</span>
           </div>
           <div className="summary-item">
@@ -41,8 +41,8 @@ export default function LogViewer({ results, error }) {
 
       {total_count === 0 ? (
         <div className="no-results">
-          <p>No logs found for this trace ID.</p>
-          <p className="hint">Try adjusting the time range or check if the trace ID is correct.</p>
+          <p>No logs found for this journey ID.</p>
+          <p className="hint">Try adjusting the time range or check if the journey ID is correct.</p>
         </div>
       ) : (
         <div className="logs-container">

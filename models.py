@@ -13,7 +13,7 @@ class LogSearchRequest(BaseModel):
 
     trace_id: str = Field(
         ...,
-        description="The trace ID to search for",
+        description="The journey ID to search for (journeyId field in Splunk)",
         min_length=1,
         examples=["abc-123-def-456"],
     )

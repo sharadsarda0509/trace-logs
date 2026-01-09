@@ -36,7 +36,7 @@ export default function Login({ onLogin }) {
     <div className="login-container">
       <div className="login-box">
         <div className="login-header">
-          <h1>🔍 TraceID Log Search</h1>
+          <h1>Journey Log Search</h1>
           <p>Authentication Required</p>
         </div>
 
