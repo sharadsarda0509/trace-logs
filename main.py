@@ -153,16 +153,28 @@ async def health_check() -> HealthResponse:
 
 # Mount static files (built React app)
 # Note: API routes defined above take precedence over static files
-try:
-    static_dir = Path(__file__).parent / "static"
+static_dir = Path(__file__).parent / "static"
+
+if static_dir.exists():
     app.mount(
         "/",
         StaticFiles(directory=static_dir, html=True),
         name="static"
     )
     logger.info(f"Static files mounted from {static_dir}")
-except (RuntimeError, FileNotFoundError) as e:
-    logger.warning(f"Static directory not found. Frontend will not be served. ({e})")
+else:
+    logger.error(f"Static directory not found at {static_dir}. Frontend will not be served.")
+    logger.error("Please build the frontend with: cd frontend && npm install && npm run build")
+    
+    # Serve a simple error page as fallback
+    @app.get("/")
+    async def root():
+        return {
+            "error": "Frontend not built",
+            "message": "The React frontend has not been built. Please run: cd frontend && npm install && npm run build",
+            "api_docs": "/docs",
+            "health": "/health"
+        }
 
 
 if __name__ == "__main__":
