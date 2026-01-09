@@ -1,24 +1,11 @@
 services:
   - type: web
     name: traceid-log-service
-    env: python
+    env: docker
     region: oregon # Choose: oregon, ohio, virginia, frankfurt, singapore
     plan: free # Free tier
-    buildCommand: |
-      # Install uv (fast Python package installer)
-      pip install uv
-      # Install Python dependencies
-      uv sync
-      # Ensure we're using Node 18+
-      node --version
-      npm --version
-      # Install Node.js dependencies and build frontend
-      cd frontend
-      npm install
-      npm run build
-      ls -la ../static
-      cd ..
-    startCommand: "uv run uvicorn main:app --host 0.0.0.0 --port $PORT"
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     
     # Environment variables (set these in Render dashboard)
