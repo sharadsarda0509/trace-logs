@@ -64,3 +64,55 @@ export async function checkHealth() {
   }
 }
 
+/**
+ * Validate API key by making a test request
+ * @param {string} apiKey - API key to validate
+ * @returns {Promise<boolean>} True if valid, throws error if invalid
+ */
+export async function validateApiKey(apiKey) {
+  try {
+    // Make a test request with the API key to validate it
+    // We'll use the search endpoint with minimal data to test authentication
+    const response = await axios.post(
+      `${API_BASE_URL}/api/logs/search`,
+      {
+        trace_id: 'validation-test',
+        aem_service: 'validation-test',
+        index: 'validation-test',
+        aem_tier: 'author',
+        time_range_hours: 1,
+        limit: 1
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        validateStatus: function (status) {
+          // Consider 401/403 as "handled" errors for validation
+          // 500 might mean API key is valid but other error occurred
+          return status < 500;
+        }
+      }
+    );
+
+    // If we get 401 or 403, the API key is invalid
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Invalid API Key');
+    }
+
+    // Any other response (including 500 from bad parameters) means API key is valid
+    return true;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error('Invalid API Key: Authentication required');
+      } else if (error.response.status === 403) {
+        throw new Error('Invalid API Key: Access forbidden');
+      }
+    }
+    // Network error or other issue
+    throw new Error(error.message || 'Unable to validate API key');
+  }
+}
+

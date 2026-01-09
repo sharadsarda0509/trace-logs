@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import { validateApiKey } from '../services/api';
 import './Login.css';
 
 export default function Login({ onLogin }) {
   const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!apiKey.trim()) {
@@ -13,11 +15,21 @@ export default function Login({ onLogin }) {
       return;
     }
 
-    // Store API key in localStorage
-    localStorage.setItem('apiKey', apiKey.trim());
-    
-    // Notify parent component
-    onLogin(apiKey.trim());
+    // Validate API key with backend
+    setIsValidating(true);
+    setError('');
+
+    try {
+      await validateApiKey(apiKey.trim());
+      
+      // API key is valid - store it and login
+      localStorage.setItem('apiKey', apiKey.trim());
+      onLogin(apiKey.trim());
+    } catch (err) {
+      // API key is invalid
+      setError(err.message || 'Invalid API key. Please try again.');
+      setIsValidating(false);
+    }
   };
 
   return (
@@ -47,8 +59,14 @@ export default function Login({ onLogin }) {
 
           {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" className="login-button">
-            Login
+          <button type="submit" className="login-button" disabled={isValidating}>
+            {isValidating ? (
+              <>
+                <span className="spinner"></span> Validating...
+              </>
+            ) : (
+              'Login'
+            )}
           </button>
         </form>
 
