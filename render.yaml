@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: traceid-log-service
+    env: python
+    region: oregon # Choose: oregon, ohio, virginia, frankfurt, singapore
+    plan: free # Free tier
+    buildCommand: |
+      # Install uv (fast Python package installer)
+      pip install uv
+      # Install Python dependencies
+      uv sync
+      # Install Node.js dependencies and build frontend
+      cd frontend
+      npm install
+      npm run build
+      cd ..
+    startCommand: "uv run uvicorn main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    
+    # Environment variables (set these in Render dashboard)
+    envVars:
+      # Splunk Configuration (REQUIRED)
+      - key: SPLUNK_HOST
+        value: splunk-api.or1.adobe.net
+      - key: SPLUNK_USER
+        value: svc-aem-voodoo-splunk
+      - key: SPLUNK_PASS
+        sync: false # Set as secret in Render dashboard
+      - key: SPLUNK_PORT
+        value: 443
+      - key: SPLUNK_SCHEME
+        value: https
+      
+      # Service Configuration (OPTIONAL - has defaults)
+      - key: MAX_RETRIES
+        value: 3
+      - key: DEFAULT_TIME_RANGE_HOURS
+        value: 24
+      - key: MAX_TIME_RANGE_HOURS
+        value: 168
+      - key: DEFAULT_LIMIT
+        value: 500
+      - key: LOG_LEVEL
+        value: INFO
+      
+      # HashiCorp Vault (OPTIONAL - for production secret management)
+      # Uncomment and set in Render dashboard if using Vault
+      # - key: VAULT_ADDR
+      #   value: https://vault-amer.adobe.net
+      # - key: VAULT_ROLE_ID
+      #   sync: false
+      # - key: VAULT_SECRET_ID
+      #   sync: false
+      # - key: VAULT_SECRET_PATH
+      #   sync: false
+

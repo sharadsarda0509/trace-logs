@@ -9,6 +9,8 @@ env/
 ENV/
 *.egg-info/
 .env
+.env.local
+.env.*.local
 
 # uv
 .venv/
@@ -20,6 +22,10 @@ frontend/dist/
 # Static build output (served by FastAPI)
 static/
 
+# Logs
+*.log
+logs/
+
 # IDEs
 .vscode/
 .idea/
@@ -30,4 +36,10 @@ static/
 # OS
 .DS_Store
 Thumbs.db
+
+# Secrets and credentials (extra safety)
+*.pem
+*.key
+secrets.yaml
+credentials.json
 
